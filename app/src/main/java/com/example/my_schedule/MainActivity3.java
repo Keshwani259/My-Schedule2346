@@ -8,10 +8,13 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -28,18 +31,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.appcheck.FirebaseAppCheck;
-import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.events.Event;
+import com.example.myapplication.DataBase;
 
-import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -50,9 +43,22 @@ public class MainActivity3 extends AppCompatActivity {
     TextView Time, TextViewCal;
     EditText contacteditext, NameEdittext, Event1, Event2, Event3;
     //EditText NameEdittext;
-  //  int mYear, mMonth, mDay, mHour, mMinutee;
-    int t2Hour, t2Minute;
+    int mYear, mMo, mDy, mHur, mMinutee;
+    int t2Ho, t2Minutem;
     DataBase dataBase;
+    private String[]  PERMUISSION;
+
+
+
+
+    private DatePickerDialog.OnDateSetListener dateSeListenr;
+    private TimePickerDialog.OnTimeSetListener onTimeSetListener;
+
+
+
+    Calendar caldeen;
+     Calendar myCalendar;
+
     //DatabaseHandler DB;
 
     private static final int CONTACT_PERMISSION_CODE = 1;
@@ -66,92 +72,64 @@ public class MainActivity3 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
-        initDatePicker();
+        myCalendar = Calendar.getInstance();
         contacteditext = findViewById(R.id.contactEDittext);
         NameEdittext = findViewById(R.id.NameEdtext);
         TextViewCal = findViewById(R.id.textView5);
-        TextViewCal.setText(getTodaysDate());
         Time = findViewById(R.id.textView4);
         Event1 = findViewById(R.id.event1);
         Event2 = findViewById(R.id.event2);
         Event3 = findViewById(R.id.event3);
         save_button = findViewById(R.id.button2);
-        dataBase = new DataBase(this);
+        dataBase = new com.example.myapplication.DataBase(this);
+        Calendar mCalendar ;
+        mCalendar = Calendar.getInstance();
 
-       // databaseUsers = FirebaseDatabase.getInstance().getReference();
+        PERMUISSION = new String[]{
+                Manifest.permission.SEND_SMS
+        };
 
+
+
+        // databaseUsers = FirebaseDatabase.getInstance().getReference();
+        caldeen = Calendar.getInstance();
         save_button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { InsertData(); }
+            public void onClick(View v) { InsertData();
+                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+//                caldeen.set(Calendar.MONTH, mMo);
+//                caldeen.set(Calendar.YEAR, mYear);
+//                caldeen.set(Calendar.DAY_OF_MONTH, mDy);
+                Date date= new Date();
+                Calendar cal_aLarm = Calendar.getInstance();
+
+
+
+
+                Calendar cal_now =  Calendar.getInstance();
+                cal_now.setTime(date);
+                cal_aLarm.setTime(date);
+                cal_aLarm.set(Calendar.MONTH, mMo);
+                cal_aLarm.set(Calendar.YEAR, mYear);
+                cal_aLarm.set(Calendar.DAY_OF_MONTH, mDy);
+                cal_aLarm.set(Calendar.HOUR_OF_DAY, t2Ho);
+                cal_aLarm.set(Calendar.MINUTE, t2Minutem);
+
+                if (!hasPermissio(MainActivity3.this, PERMUISSION)){
+                    ActivityCompat.requestPermissions(MainActivity3.this, PERMUISSION, CONTACT_PERMISSION_CODE);
+                }
+                int fd = (int) Calendar.getInstance().getTimeInMillis();
+                Intent i =  new Intent(MainActivity3.this, BroadCastReciever.class);
+                i.putExtra("MyMessage",Event3.getText().toString());
+                i.putExtra("phone", contacteditext.getText().toString());
+                PendingIntent pendingInte =  PendingIntent.getBroadcast(MainActivity3.this, fd, i , PendingIntent.FLAG_UPDATE_CURRENT);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal_aLarm.getTimeInMillis(), pendingInte);
+
+            }
         });
 
 
 
-
-     //   // databas = FirebaseDatabase.getInstance().getReference().child("Add");
-
-//        BroadcastReceiver myLocalBroadcastReciever = (context, intent) -> {
-//            String result = intent.getStringExtra("result");
-//            Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
-//        };
-
-
-//        //Whatsapp number exist or not
-//        private void handleActionWHATSAPP(String message, String count, String[] mobile_number ){
-//            try {
-//                PackageManager packageManager = getApplicationContext().getPackageManager();
-//                if(mobile_number.length!=0){
-//                    for(int j = 0; j < mobile_number.length; j++){
-//                        for(int i = 0; i<Integer.parseInt(count.toString()); i++){
-//                            String number = mobile_number[j];
-//                            String url = "https://api.whatsapp.com?phone="+number+"&text="+ URLEncoder.encode(message, "UTF-8");
-//                            Intent whatappIntent = new Intent(Intent.ACTION_VIEW);
-//                            whatappIntent.setPackage("com.whatsapp");
-//                            whatappIntent.setData(Uri.parse(url));
-//                            whatappIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                            if(whatappIntent.resolveActivity(packageManager)!=null) {
-//                                getApplicationContext().startActivity(whatappIntent);
-//                                Thread.sleep(10000);
-//                                sendBroadcastMessage("Result: " + number);
-//                            }else {
-//                                sendBroadcastMessage("Result: WhatsApp not installed");
-//                            }
-//                        }
-//                    }
-//                }
-//            }catch (Exception e){
-//                sendBroadcastMessage("Result: "+e.toString());
-//            }
-//        }
-
-
-//        Intent intent = getIntent();
-//        String s = intent.getStringExtra("key");
-//        Intent inte = new Intent(this, MainActivity2.class);
-//        save_button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                databas = FirebaseDatabase.getInstance().getReference().child("/");
-//                Modalclass om = new Modalclass(NameEdittext.getText().toString(),
-//                        contacteditext.getText().toString(),
-//                        TextViewCal.getText().toString(),
-//                        textView.getText().toString(),
-//                        Event1.getText().toString(),
-//                        Event2.getText().toString(),
-//                        Event3.getText().toString());
-//                databas.push().setValue(om).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        Toast.makeText(MainActivity3.this, "Saved Changes", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//
-//
-//
-//                startActivity(inte);
-//                finish();
-//            }
-//        });
 
 
         Time.setOnClickListener(new View.OnClickListener() {
@@ -163,30 +141,50 @@ public class MainActivity3 extends AppCompatActivity {
                         new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                t2Hour = hourOfDay;
-                                t2Minute = minute;
-                                String time = t2Hour + ":" + t2Minute;
-                                SimpleDateFormat f24Hours = new SimpleDateFormat(
-                                        "HH:mm"
-                                );
-                                try {
-                                    Date date = f24Hours.parse(time);
-                                    SimpleDateFormat f12Hours = new SimpleDateFormat(
-                                            "hh:mm aa");
-                                    Time.setText(f12Hours.format(date));
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
+                                t2Ho = hourOfDay;
+                                t2Minutem = minute;
+                                String time = hourOfDay + ":" + minute;
+                                mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                mCalendar.set(Calendar.MINUTE, minute);
+                                mCalendar.set(Calendar.SECOND, 0);
+                                Time.setText(time);
                             }
-                        }, 12, 0, false
+                        }, mHur, mMinutee, false
                 );
                 timePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                timePickerDialog.updateTime(t2Hour, t2Minute);
+                timePickerDialog.updateTime(mHur, mMinutee);
                 timePickerDialog.show();
-
             }
 
         });
+TextViewCal.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear+1);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                mMo = monthOfYear;
+                mYear = year;
+                mDy = dayOfMonth;
+
+                TextViewCal.setText(dayOfMonth+" "+monthOfYear +" "+year);
+            }
+        };
+
+
+        DatePickerDialog datePickerDialog=  new DatePickerDialog(MainActivity3.this,R.style.Theme_MySchedule, date, myCalendar
+                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),myCalendar.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.show();
+
+    }
+});
+
 
 
         NameEdittext.setOnClickListener(new View.OnClickListener() {
@@ -222,94 +220,22 @@ public class MainActivity3 extends AppCompatActivity {
 
         }
 
-       // String id = databaseUsers.push().getKey();
-//        boolean checkInsertData = DB.insertUserData(name, phoneNumber, calendar, time, e1, e2, e3);
-//        if (checkInsertData == true){
-//            Toast.makeText(this, "Inserted Data", Toast.LENGTH_SHORT).show();
-//        }
-//        else{
-//            Toast.makeText(this, "User data insertion failed", Toast.LENGTH_SHORT).show();
-//        }
-
-        //Modalclass user = new Modalclass(name, phoneNumber,calendar, time, e1, e2, e3);
-        //databaseUsers.child("users").child(id).setValue(user)
-          //      .addOnCompleteListener(new OnCompleteListener<Void>() {
-            //        @Override
-              //      public void onComplete(@NonNull Task<Void> task) {
-                //        if (task.isSuccessful()){
-                  //          Toast.makeText(MainActivity3.this, "User Details Inserted", Toast.LENGTH_SHORT).show();
-                    //    }
-                   // }
-                //});
 
     }
 
-    private String getTodaysDate() {
-        Calendar cal = Calendar.getInstance();
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        month = month + 1;
-        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-        return makeDateString(dayOfMonth, month, year);
-    }
+    public   boolean hasPermissio(Context context  , String... PERMISSSSION){
+        if(context != null &&PERMISSSSION !=null){
+            for (String permission : PERMISSSSION){
+                if(ActivityCompat.checkSelfPermission(context, permission)!=PackageManager.PERMISSION_GRANTED)
+                {
+                    return false;
+                }
 
-    private void initDatePicker(){
-        DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                month = month + 1;
-                String Date = makeDateString(dayOfMonth, month, year);
-                TextViewCal.setText(Date);
             }
-        };
-
-        Calendar cal = Calendar.getInstance();
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-
-        int style = AlertDialog.THEME_HOLO_LIGHT;
-
-        datePickerDialog = new DatePickerDialog(this, style, dateSetListener, year, month, dayOfMonth);
+        }
+        return true;
     }
 
-    private String makeDateString(int dayOfMonth, int month, int year) {
-        return dayOfMonth + "/" + getMonthFormat(month) + "/" + year;
-    }
-
-    private String getMonthFormat(int month) {
-        if(month == 1)
-            return "Jan";
-        if(month == 2)
-            return "Feb";
-        if(month == 3)
-            return "March";
-        if(month == 4)
-            return "April";
-        if(month == 5)
-            return "May";
-        if(month == 6)
-            return "June";
-        if(month == 7)
-            return "July";
-        if(month == 8)
-            return "Aug";
-        if(month == 9)
-            return "Sept";
-        if(month == 10)
-            return "Oct";
-        if(month == 11)
-            return "Nov";
-        if(month == 12)
-            return "Dec";
-
-        //Default should never happen
-        return "Jan";
-    }
-
-    public void openDatePicker(View view){
-        datePickerDialog.show();
-    }
 
     private boolean checkContactPermission() {
         //check if contact permission was granted or not
@@ -332,10 +258,7 @@ public class MainActivity3 extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         startActivityForResult(intent, CONTACT_PICK_CODE);
 // App check
-        FirebaseApp.initializeApp(/*context=*/ this);
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-        firebaseAppCheck.installAppCheckProviderFactory(
-                SafetyNetAppCheckProviderFactory.getInstance());
+
     }
 
     @Override
@@ -346,6 +269,13 @@ public class MainActivity3 extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //Permission granted, can pick a contact now
                 pickContactIntent();
+            } else {
+                //Permission denied
+                Toast.makeText(this, "Permission denied...", Toast.LENGTH_SHORT).show();
+            }
+            if ( grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                //Permission granted, can pick a contact now
+                Toast.makeText(this, "PErmission GR", Toast.LENGTH_LONG).show();
             } else {
                 //Permission denied
                 Toast.makeText(this, "Permission denied...", Toast.LENGTH_SHORT).show();
@@ -417,33 +347,6 @@ public class MainActivity3 extends AppCompatActivity {
 
 
 
-
-    //@Override
-    //protected void onCreate(Bundle savedInstanceState) {
-      //  super.onCreate(savedInstanceState);
-       // setContentView(R.layout.activity_main);
-        //button = findViewById(R.id.button);
-
-
-
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                String d= et1.getText().toString();
-//                String fd= et3.getText().toString();
-
-//                Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-//                startActivity(intent);
-//            }
-//
-//        });
-//
-//
-//
-//
-//
-//    }
-//
 //
 //
 //

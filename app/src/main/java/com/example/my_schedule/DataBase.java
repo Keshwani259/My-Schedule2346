@@ -1,4 +1,4 @@
-package com.example.my_schedule;
+package com.example.myapplication;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -49,7 +49,7 @@ public class DataBase extends SQLiteOpenHelper {
             return true;
         }
     }
-    Cursor readall(){
+    public Cursor readall(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         Cursor cursor = sqLiteDatabase.rawQuery("Select * from PRODUCTS", null);
         return cursor;

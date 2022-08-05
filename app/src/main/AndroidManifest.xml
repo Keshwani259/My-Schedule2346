@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.READ_CONTACTS"></uses-permission>
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SEND_SMS"/>
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -16,38 +18,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MySchedule"
         tools:targetApi="31">
-<!--        <activity-->
-<!--            android:name=".WhatAppAccessibilityService"-->
-<!--            android:exported="false" />-->
-        <!-- <service android:name=".WhatAppAccessibilityService" -->
-        <!-- android:label="My Whatsapp Accessibility" -->
-        <!-- android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" -->
-        <!-- android:exported="false"> -->
-        <!-- <meta-data -->
-        <!-- android:name="android.accessibilityService" -->
-        <!-- android:resource="@xml/whatsappservice"/> -->
-        <!-- <intent-filter> -->
-        <!-- <action> android:name="android.accessibilityservice.AccessibilityService"</action> -->
-        <!-- </intent-filter> -->
-        <!-- </service> -->
+
         <activity
             android:name=".MainActivity3"
             android:exported="false" />
         <activity
             android:name=".MainActivity2"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_main2"
-            android:theme="@style/Theme.MySchedule.NoActionBar" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:theme="@style/Theme.MySchedule.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".Broadcas"/>
+        <receiver android:name=".BroadCastReciever"></receiver>
     </application>
 
 </manifest>

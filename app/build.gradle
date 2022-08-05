@@ -49,21 +49,7 @@ dependencies {
     // Java language implementation
     implementation "androidx.sqlite:sqlite:$sqlite_version"
     // Import the BoM for the Firebase platform
-    implementation platform('com.google.firebase:firebase-bom:30.2.0')
-    implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.google.firebase:firebase-database'
-    implementation 'com.firebaseui:firebase-ui-database:8.0.1'
 
-    // FirebaseUI for Cloud Firestore
-    implementation 'com.firebaseui:firebase-ui-firestore:8.0.1'
-    //App Check Library
-    implementation 'com.google.firebase:firebase-appcheck-safetynet:16.0.0'
-
-    // FirebaseUI for Firebase Auth
-    implementation 'com.firebaseui:firebase-ui-auth:8.0.1'
-
-    // FirebaseUI for Cloud Storage
-    implementation 'com.firebaseui:firebase-ui-storage:8.0.1'
     implementation 'com.android.support:multidex:1.0.3'
 }
 
